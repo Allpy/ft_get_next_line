@@ -6,18 +6,23 @@
 /*   By: alermi <alermi@student.42kocaeli.com.tr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/02 16:10:09 by alermi            #+#    #+#             */
-/*   Updated: 2024/12/04 14:06:20 by alermi           ###   ########.tr       */
+/*   Updated: 2024/12/24 14:47:34 by alermi           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stddef.h>
 #include <stdlib.h>
 
-char    *ft_free(char *data)
+char	*ft_double_free(char *locate1, char *locate2)
 {
-    if (data)
-        free(data);
-    return (NULL);    
+	if (locate1)
+		free(locate1);
+	locate1 = NULL;
+	if (locate2 != 0)
+	{
+		free(locate2);
+		locate2 = NULL;
+	}
+	return (NULL);
 }
 
 char	*ft_strchr(const char *s, int c)
@@ -33,73 +38,6 @@ char	*ft_strchr(const char *s, int c)
 	return (NULL);
 }
 
-size_t	ft_strlen(const char *s)
-{
-	char	*p;
-
-	p = (char *)s;
-	while (*p)
-		p++;
-	return ((size_t)(p - s));
-}
-
-size_t	ft_strlcpy(char *dest, const char *src, size_t dsize)
-{
-	size_t	src_size;
-	size_t	i;
-
-	src_size = ft_strlen(src);
-	if (dsize == 0)
-		return (src_size);
-	i = 0;
-	while (i < (dsize - 1) && src[i])
-	{
-		dest[i] = src[i];
-		i++;
-	}
-	dest[i] = '\0';
-	return (src_size);
-}
-
-char	*ft_strdup(const char *s)
-{
-	char	*dest;
-	size_t	i;
-
-	dest = (char *) malloc(ft_strlen(s) + 1);
-	if (!dest)
-		return (NULL);
-	i = 0;
-	while (s[i])
-	{
-		dest[i] = s[i];
-		i++;
-	}
-	dest[i] = 0;
-	return (dest);
-}
-
-size_t	ft_strlcat(char *dst, const char *src, size_t dsize)
-{
-	size_t	src_size;
-	size_t	dst_size;
-	size_t	i;
-
-	src_size = ft_strlen(src);
-	dst_size = ft_strlen(dst);
-	i = 0;
-	if (dsize <= dst_size)
-		return (src_size + dsize);
-	while (src[i] && i < dsize - dst_size - 1)
-	{
-		dst[dst_size + i] = src[i];
-		i++;
-	}
-	dst [dst_size + i] = '\0';
-	return (src_size + dst_size);
-}
-
-
 void	*ft_calloc(size_t nmemb, size_t size)
 {
 	unsigned char	*tmp;
@@ -114,23 +52,37 @@ void	*ft_calloc(size_t nmemb, size_t size)
 	return (tmp);
 }
 
-
-char	*ft_strjoin(char const *s1, char const *s2)
+size_t	ft_strlen(const char *s)
 {
-	char	*dest;
-	size_t	length;
+	char	*p;
 
-	if (!s1 && !s2)
-		return (NULL);
-	if (!s1 && *s2)
-		return (ft_strdup(s2));
-	if (!s2 && *s1)
-		return (ft_strdup(s1));
-	length = (ft_strlen(s1) + ft_strlen(s2) + 1);
-	dest = ft_calloc(sizeof(char), length);
-	if (!dest)
-		return (NULL);
-	ft_strlcpy(dest, s1, length);
-	ft_strlcat(dest, s2, length);
-	return (dest);
+	if (!s)
+		return (0);
+	p = (char *)s;
+	while (*p)
+		p++;
+	return ((size_t)(p - s));
+}
+
+char	*ft_strjoin(char *data, char	*buffer)
+{
+	size_t	data_len;
+	size_t	buf_len;
+	size_t	i;
+	size_t	j;
+	char	*new_data;
+
+	data_len = ft_strlen(data);
+	buf_len = ft_strlen(buffer);
+	new_data = (char *)ft_calloc((buf_len + data_len + 1), sizeof(char));
+	if (!new_data)
+		return (ft_double_free(data, 0));
+	i = -1;
+	while (++i < data_len)
+		new_data[i] = data[i];
+	j = -1;
+	while (++j < buf_len)
+		new_data[i++] = buffer[j];
+	ft_double_free(data, 0);
+	return (new_data);
 }
